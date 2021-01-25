@@ -109,7 +109,6 @@ def mutspec_192(data, ref):
 
     fig, ax = plt.subplots(figsize=(10,30))
     ax.set_title('MutSpec192')
-    # plt.bar(mutspec.keys(), mutspec.values(), width = 0.4)
     df= pd.DataFrame([(k,mutspec[k]) for k  in mutspec])
     ax.barh(df[0], df[1])
     plt.yticks((np.arange((len(df)))), df[0])
@@ -118,19 +117,19 @@ def mutspec_192(data, ref):
     plt.savefig(figuresPath / 'mutspec192.png')
 
 
-#
-# mutspec = twelve_comp_mutspec(data)
-# surface_mut_spec = pd.DataFrame([mutspec])
-# surface_mut_spec.to_csv(resultPath / 'surface_mut_spec.csv')
-#
-# fig = plt.figure()
-# plt.title('Surface MutSpec')
-# plt.bar(mutspec.keys(), mutspec.values())
-# fig.savefig(figuresPath / 'surface_mut_spec.png')
-#
-# twelve_comp_mutspec_NS_S(data)
-# for gen in data['ORF'].unique():
-#      mutspec_per_gen(data, gen)
+
+mutspec = twelve_comp_mutspec(data)
+surface_mut_spec = pd.DataFrame([mutspec])
+surface_mut_spec.to_csv(resultPath / 'surface_mut_spec.csv')
+
+fig = plt.figure()
+plt.title('Surface MutSpec')
+plt.bar(mutspec.keys(), mutspec.values())
+fig.savefig(figuresPath / 'surface_mut_spec.png')
+
+twelve_comp_mutspec_NS_S(data)
+for gen in data['ORF'].unique():
+     mutspec_per_gen(data, gen)
 nucl_ref = ''
 with open (ref, 'r') as ref:
     a = ref.readlines()
