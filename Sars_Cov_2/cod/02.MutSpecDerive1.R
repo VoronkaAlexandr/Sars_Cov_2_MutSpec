@@ -9,7 +9,7 @@ ann[is.na(ann$MutObsNC),]$MutObsNC <- 0
 summary(ann$MutObsNC) # max is 36347.00 -> I think on NC we may have count of mutations (mutation frequency), not the count of events => check it
 
 ##### 2: filter out everything except synonymous mutations
-table(ann$GenType)  # there are 42 empty!!! what is it??
+table(ann$GenType)  # there are 42 empty!!! what is it??.........Now it is OK
 
 ann = ann[ann$GenType == 'translated',]
 ann = ann[ann$RefAa != '*',]
