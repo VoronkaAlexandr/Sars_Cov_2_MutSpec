@@ -316,7 +316,7 @@ for i in range(28260 - 27893 - 1):
         k += 1
 
 df['GenName'][(28259 < df.Pos) & (df.Pos < 28274)] = 'ORF8-N_space'
-df['GenType'][(27887 < df.Pos) & (df.Pos < 27894)] = 'untranslated'
+df['GenType'][(28259 < df.Pos) & (df.Pos < 28274)] = 'untranslated'
 
 for i in range(28274 - 28259 - 1):
     nuc_in_codon.append('None')
