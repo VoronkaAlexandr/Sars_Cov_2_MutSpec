@@ -1,0 +1,14 @@
+"","NucSubst","Month_Mut_Count"
+"1","AAG>AGG",2
+"2","ACA>ATA",1
+"3","AGA>ATA",1
+"4","ATC>ACC",1
+"5","ATT>ACT",1
+"6","CAG>CTG",1
+"7","CCA>CTA",1
+"8","CTC>CCC",1
+"9","GTT>GGT",1
+"10","TCG>TTG",1
+"11","TCT>TTT",2
+"12","TGT>TTT",1
+"13","TTG>TCG",1
