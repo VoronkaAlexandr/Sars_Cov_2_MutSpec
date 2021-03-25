@@ -1,6 +1,7 @@
 rm(list=ls(all=TRUE))
 
 ann = read.csv("D:/Sars_Cov_2_MutSpec-main/Sars_Cov_2_MutSpec-main/Sars_Cov_2/data_obtained/ideal_table.csv")
+# ann = read.csv("/../data_obtained/ideal_table.csv")
 
 ann = ann[ann$GenType == 'translated',]
 ann = ann[ann$RefAa != '*',]
