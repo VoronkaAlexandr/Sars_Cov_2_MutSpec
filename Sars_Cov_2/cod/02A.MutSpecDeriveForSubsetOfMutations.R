@@ -1,9 +1,19 @@
 rm(list=ls(all=TRUE))
 
 ##### 0. settings:
+Final = data.frame()
 
-MutationType = 'synonymous'
-AnalyzedGenes = 'ORF1ab' # 'All' # 
+MutationTypeVec = c('All','synonymous','nonsynonymous') # 
+AnalyzedGenesVec = c('All','ORF1ab','S','M','N','ORF3a','ORF8') # etc 
+# we can add here also timeframe
+
+for (MutationType in MutationTypeVec)
+{
+for (AnalyzedGenes in AnalyzedGenesVec)  
+{
+  
+#MutationType = 'synonymous'
+#AnalyzedGenes = 'ORF1ab' # 
 
 ##### 1. read dataset with mutations and prepare a data-frame ObservedMutations with four columns: ("Pos","RefNuc","AltNuc","ObservedMutations")
 #### only A T G C should be in RefNuc and AltNuc
@@ -42,25 +52,40 @@ AnnMut[AnnMut$Pos == 6851,]
 if (MutationType == 'synonymous')
 { AnnMut = AnnMut[AnnMut$GenType == 'translated' & AnnMut$RefAa != '*' & AnnMut$RefAa == AnnMut$AltAa,] }
 
+if (MutationType == 'nonsynonymous')
+{ AnnMut = AnnMut[AnnMut$GenType == 'translated' & AnnMut$RefAa != '*' & AnnMut$RefAa != AnnMut$AltAa,] }
+
 if (AnalyzedGenes != 'All') 
 { AnnMut = AnnMut[AnnMut$GenName == AnalyzedGenes,] }
 
-##### 6. Estimate MutSpec: Expected, Observed and 
+##### 6. Estimate MutSpec: Expected, Observed and Obs/Exp
+
+ZeroTemplate = c('A>C','A>G','A>T','C>A','C>G','C>T','G>A','G>C','G>T','T>A','T>C','T>G')
+ZeroTemplate = data.frame(ZeroTemplate); names(ZeroTemplate)=c('NucSubst')
 AnnMut$MutExp <- 1
 AnnMut$NucSubst = paste(AnnMut$RefNuc,AnnMut$AltNuc,sep='>')
 Exp12Comp = aggregate(AnnMut$MutExp, by = list(AnnMut$NucSubst), FUN = sum); 
-names(Exp12Comp)=c('NucSubst','ExpFr')
+names(Exp12Comp)=c('NucSubst','ExpFr') # Exp12Comp$NucSubstr
 
 Obs12Comp = aggregate(AnnMut$ObservedMutations, by = list(AnnMut$NucSubst), FUN = sum); 
 names(Obs12Comp)=c('NucSubst','ObsFr')
 
-MutSpec12Comp = merge(Exp12Comp,Obs12Comp, by = 'NucSubst')
+MutSpec12Comp = merge(ZeroTemplate,Exp12Comp, by = 'NucSubst', all.x = TRUE)
+MutSpec12Comp = merge(MutSpec12Comp,Obs12Comp, by = 'NucSubst',all.x = TRUE)
+MutSpec12Comp[is.na(MutSpec12Comp)] <- 0
 MutSpec12Comp$ObsToExp = MutSpec12Comp$ObsFr/MutSpec12Comp$ExpFr
+MutSpec12Comp$ObsToExp[is.na(MutSpec12Comp$ObsToExp)] <- 0 # if zer odivide by zero => Nan, we substitute it by zero again
+
 MutSpec12Comp$MutSpec = MutSpec12Comp$ObsToExp/sum(MutSpec12Comp$ObsToExp)
 sum(MutSpec12Comp$MutSpec) # 1 == GOOD
+MutSpec12Comp$MutationType = MutationType
+MutSpec12Comp$AnalyzedGenes = AnalyzedGenes
 MutSpec12Comp
+Final = rbind(Final,MutSpec12Comp)
 
-barplot(MutSpec12Comp$MutSpec, names =  MutSpec12Comp$NucSubst, main = 'mut spec 12 comp syn mut', cex.names = 0.7)
+barplot(MutSpec12Comp$MutSpec, names =  MutSpec12Comp$NucSubst, main = paste(MutationType, AnalyzedGenes, sep = ' '), cex.names = 0.7)
+}
+}
 
 # knit: Ctrl + Shift + K => html
 
