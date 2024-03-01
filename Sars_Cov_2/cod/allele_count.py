@@ -1,5 +1,4 @@
 import pandas as pd
-import json
 from tqdm import tqdm
 
 codontab = {
@@ -72,42 +71,29 @@ codontab = {
 mut = pd.read_csv("../data/u_mutation_dists.filtered.csv")
 mut['pos'] = mut['pos'] -1
 aa_info = mut[['pos', 'NucInCodon', 'CodonNumber']].drop_duplicates()
-polym_df_ns_pos = mut.loc[(mut['pos'] >= 13442) & (mut['pos'] <= 16236) & (mut['AaSub'] == "NS"),'pos'].unique().tolist()
+polym_df_ns_pos = mut.loc[(mut['pos'] >= 11842) & (mut['pos'] <= 21551) & (mut['AaSub'] == "NS"),'pos'].unique().tolist()
 del mut
-node_allele = {}
-with open("../data/mulal.filtered.fasta.prank.anc.fas") as fasta_file:
+nuc_in_codon_dict = dict(zip(aa_info['pos'], aa_info['NucInCodon']))
+with open("../data/mulal.filtered.fasta.prank.anc.fas", 'r') as fasta_file, \
+        open("../data_obtain/node_allele.txt", 'w') as write_file, open("../data_obtain/one_nod_per_allel.txt", 'w') as node_file:
+    write_file.write('node_name' + ',' + 'node_value'+'\n')
+    node_file.write('allel_name' + ',' + 'node_name' + '\n')
     for line in tqdm(fasta_file):
         line = line.rstrip()
-        if not line.startswith('>'):
+        if line.startswith('>'):
+            node_name = line[1:]
+        elif not line.startswith('>'):
+            node_value = []
             for pos in polym_df_ns_pos:
-                if aa_info.loc[aa_info['pos'] == pos, 'NucInCodon'].values[0] == '1':
+                if nuc_in_codon_dict[pos] == '1':
                     codon = line[pos:pos + 3]
-                elif aa_info.loc[aa_info['pos'] == pos, 'NucInCodon'].values[0] == '2':
+                elif nuc_in_codon_dict[pos] == '2':
                     codon = line[pos - 1:pos + 2]
-                elif aa_info.loc[aa_info['pos'] == pos, 'NucInCodon'].values[0] == '3':
+                elif nuc_in_codon_dict[pos] == '3':
                     codon = line[pos - 2:pos + 1]
                 aa_num = aa_info.loc[aa_info['pos'] == pos, 'CodonNumber']
+                aa_num = int(float(aa_num.values[0]))
                 if ("_" not in codon) and ("-" not in codon):
-                    if node_name in node_allele.keys():
-                        node_allele[node_name].append(str(aa_num) + codontab[codon])
-
-                    # if line[pos] != 'T':
-                    #    node_allele[node_name].append(str(pos) + line[pos])
-                    # else:
-                    #    node_allele[node_name].append(str(pos) + 'U')
-                    elif node_name not in node_allele.keys():
-                        node_allele[node_name] = [str(pos) + codontab[codon]]
-                    # if line[pos] != 'T':
-                    #    node_allele[node_name] = [str(pos) + line[pos]]
-                    # else:
-                    #    node_allele[node_name] = [str(pos) + 'U']
-        else:
-            node_name = line[1:]
-del polym_df_ns_pos, aa_info, codontab
-
-#file = open("../data_obtain/node_allele.txt", 'w')
-#file.write(json.dumps(node_allele))
-#file.close()
-
-with open("../data_obtain/node_allele.txt", 'w') as write_file:
-    write_file.write(json.dumps(node_allele))
+                    node_file.write(str(str(aa_num) + codontab[codon]) + ',' + str(node_name) + '\n')
+                    node_value.append(str(aa_num) + codontab[codon])
+            write_file.write(node_name+','+';'.join(node_value)+'\n')
